@@ -14,5 +14,4 @@ venv/
 
 # Large Files
 *.h5
-*.mp4
 temp_video.mp4
