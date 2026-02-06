@@ -10,6 +10,10 @@ from typing import Optional
 from dotenv import load_dotenv
 from google.cloud import videointelligence
 import uvicorn
+from tensorflow.keras.models import load_model
+import numpy as np
+from PIL import Image
+import io
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +21,13 @@ load_dotenv()
 # Set Google Cloud credentials
 if os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+# Load Model
+MODEL_PATH = "hear2sign_model.h5"
+CLASS_NAMES = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 
+               'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 
+               'del', 'nothing', 'space']
+model = None
 
 app = FastAPI()
 
@@ -59,6 +70,15 @@ async def health_check():
         "supabase_url": SUPABASE_URL,
         "bucket": SUPABASE_BUCKET
     }
+
+@app.on_event("startup")
+async def load_asl_model():
+    global model
+    try:
+        model = load_model(MODEL_PATH)
+        print("ASL Model loaded successfully.")
+    except Exception as e:
+        print(f"Error loading model: {e}")
 
 @app.get("/get-video/{file_path:path}")
 async def get_video(file_path: str):
@@ -197,6 +217,43 @@ def transcribe_video(video_url: str) -> str:
         import traceback
         traceback.print_exc()
         raise Exception(f"Google Cloud Video Intelligence API error: {e}")
+    
+def predict_sign_from_data(file_data: str):
+    """Decodes base64, preprocesses, and calls the TensorFlow model."""
+    if model is None:
+        return "Model not loaded", 0.0
+
+    try:
+        # 1. Decode base64 to image
+        img_bytes = base64.b64decode(file_data)
+        img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+        
+        # 2. Preprocess 
+        img = img.resize((64, 64))
+        img_array = np.array(img)
+        img_array = np.expand_dims(img_array, axis=0) 
+
+        # 4. Predict
+        predictions = model.predict(img_array)
+        score = predictions[0] 
+        
+        predicted_idx = np.argmax(score)
+        label = CLASS_NAMES[predicted_idx]
+        confidence = float(np.max(score))
+        
+        return label, confidence
+    except Exception as e:
+        print(f"Inference error: {e}")
+        return "Error", 0.0
+
+@app.post("/predict-sign")
+async def predict_sign(request: VideoRequest):
+    label, confidence = predict_sign_from_data(request.file_data)
+    return {
+        "success": True,
+        "prediction": label,
+        "confidence": f"{confidence * 100:.2f}%"
+    }
 
 # def generate_sign_images(text: str) -> list:
 #     # Split text into words/phrases
