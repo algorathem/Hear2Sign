@@ -10,6 +10,7 @@ __pycache__/
 h2senv/
 venv/
 .env
+*.json
 
 # Large Files
 *.h5
