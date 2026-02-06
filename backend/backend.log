@@ -1,0 +1,46 @@
+/Users/xiaoyaowong/heart2sign test2/backend/backend_api.py:49: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+  class VideoRequest(BaseModel):
+INFO:     Started server process [14760]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+Supabase client initialized with URL: https://sufjgzmloxsowkvpmeaj.supabase.co
+INFO:     127.0.0.1:57044 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57270 - "OPTIONS /process-video HTTP/1.1" 200 OK
+Received request: file_name=IMG_0161.MOV, data_length=17740668
+Starting video upload to Supabase...
+Decoded video size: 13305500 bytes
+Upload result: UploadResponse(path=('uploads', '1770357817_IMG_0161.MOV'), full_path='images/uploads/1770357817_IMG_0161.MOV', fullPath='images/uploads/1770357817_IMG_0161.MOV')
+Uploaded to: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357817_IMG_0161.MOV
+Downloading video from Supabase...
+Downloading video from: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357817_IMG_0161.MOV
+Downloaded video file: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmpnbsz1zyx.mp4 (size: 13305500 bytes)
+Video file format validation passed
+Starting transcription...
+Processing video: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmpnbsz1zyx.mp4 (size: 13305500 bytes)
+INFO:     127.0.0.1:57270 - "POST /process-video HTTP/1.1" 200 OK
+Received request: file_name=Team23 CareerCompass.mp4, data_length=16995592
+Starting video upload to Supabase...
+Decoded video size: 12746692 bytes
+Upload result: UploadResponse(path=('uploads', '1770357857_Team23 CareerCompass.mp4'), full_path='images/uploads/1770357857_Team23 CareerCompass.mp4', fullPath='images/uploads/1770357857_Team23 CareerCompass.mp4')
+Uploaded to: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357857_Team23%20CareerCompass.mp4
+Downloading video from Supabase...
+Downloading video from: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357857_Team23%20CareerCompass.mp4
+Downloaded video file: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmp3uliz_ca.mp4 (size: 12746692 bytes)
+Video file format validation passed
+Starting transcription...
+Processing video: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmp3uliz_ca.mp4 (size: 12746692 bytes)
+Transcription failed: Google Cloud Speech API error: 400 Sync input too long. For audio longer than 1 min use LongRunningRecognize with a 'uri' parameter.
+INFO:     127.0.0.1:57272 - "POST /process-video HTTP/1.1" 200 OK
+Received request: file_name=IMG_0161.MOV, data_length=17740668
+Starting video upload to Supabase...
+Decoded video size: 13305500 bytes
+Upload result: UploadResponse(path=('uploads', '1770357872_IMG_0161.MOV'), full_path='images/uploads/1770357872_IMG_0161.MOV', fullPath='images/uploads/1770357872_IMG_0161.MOV')
+Uploaded to: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357872_IMG_0161.MOV
+Downloading video from Supabase...
+Downloading video from: https://sufjgzmloxsowkvpmeaj.supabase.co/storage/v1/object/public/images/uploads/1770357872_IMG_0161.MOV
+Downloaded video file: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmpt_5yoxht.mp4 (size: 13305500 bytes)
+Video file format validation passed
+Starting transcription...
+Processing video: /var/folders/bg/hhs_xxws0xj9lmtlw2bjh82w0000gn/T/tmpt_5yoxht.mp4 (size: 13305500 bytes)
+INFO:     127.0.0.1:57574 - "POST /process-video HTTP/1.1" 200 OK
