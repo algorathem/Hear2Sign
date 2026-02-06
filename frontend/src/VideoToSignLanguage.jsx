@@ -24,7 +24,10 @@ function VideoToSignLanguage() {
       const base64Data = reader.result.split(',')[1];
       
       try {
-        const response = await fetch('http://localhost:8000/process-video', {
+        const endpoint = contentType === 'sign' 
+    ? 'http://localhost:8000/predict-sign' 
+    : 'http://localhost:8000/process-video';
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -37,14 +40,8 @@ function VideoToSignLanguage() {
         
         const result = await response.json();
         
-        if (result.success) {
-          setPosts([{
-            id: Date.now(),
-            type: contentType,
-            videoUrl: result.video_url,
-            transcript: result.transcript,
-            timestamp: new Date().toLocaleString()
-          }, ...posts]);
+       if (result.success) {
+       setPosts([{id: Date.now(), type: contentType, videoUrl: result.video_url || URL.createObjectURL(file), transcript: result.prediction || result.transcript || "No text detected", timestamp: new Date().toLocaleString()}, ...posts]);
         } else {
           throw new Error(result.error || 'Processing failed');
         }

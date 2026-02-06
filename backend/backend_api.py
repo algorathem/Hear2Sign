@@ -14,6 +14,9 @@ from tensorflow.keras.models import load_model
 import numpy as np
 from PIL import Image
 import io
+import base64
+import tempfile
+import cv2
 
 # Load environment variables
 load_dotenv()
@@ -125,8 +128,7 @@ async def process_video(request: VideoRequest):
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 def upload_video_to_supabase(file_name: str, file_data: str) -> str:
-    import base64
-    
+
     if supabase is None:
         raise Exception("Supabase client not initialized")
     
@@ -219,40 +221,71 @@ def transcribe_video(video_url: str) -> str:
         raise Exception(f"Google Cloud Video Intelligence API error: {e}")
     
 def predict_sign_from_data(file_data: str):
-    """Decodes base64, preprocesses, and calls the TensorFlow model."""
     if model is None:
-        return "Model not loaded", 0.0
-
+        return "Model not loaded" 
     try:
-        # 1. Decode base64 to image
-        img_bytes = base64.b64decode(file_data)
-        img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+        # 1. Decode base64
+        if "," in file_data:
+            file_data = file_data.split(",")[1]
+        video_bytes = base64.b64decode(file_data)
         
-        # 2. Preprocess 
-        img = img.resize((64, 64))
-        img_array = np.array(img)
-        img_array = np.expand_dims(img_array, axis=0) 
+        # 2. Save to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
+            temp_video.write(video_bytes)
+            temp_path = temp_video.name
 
-        # 4. Predict
-        predictions = model.predict(img_array)
-        score = predictions[0] 
+        # 3. Open video and read frames
+        cap = cv2.VideoCapture(temp_path)
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30  
+        frame_step = max(1, int(fps * 0.3)) 
         
-        predicted_idx = np.argmax(score)
-        label = CLASS_NAMES[predicted_idx]
-        confidence = float(np.max(score))
-        
-        return label, confidence
+        transcript = []
+        last_added_label = None
+        frame_count = 0
+
+        # 4. Loop through the video
+        while cap.isOpened():
+            success, frame = cap.read()
+            if not success:
+                break
+            
+            if frame_count % frame_step == 0:
+                # Preprocess the frame
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                img = Image.fromarray(frame_rgb).resize((64, 64))
+                img_array = np.array(img)
+                img_array = np.expand_dims(img_array, axis=0)
+
+                # Predict
+                preds = model.predict(img_array, verbose=0)
+                predicted_idx = np.argmax(preds[0])
+                current_label = CLASS_NAMES[predicted_idx]
+                confidence = np.max(preds[0])
+
+                # Only add if it's not 'nothing' AND different from the last letter added
+                if current_label != "nothing" and confidence > 0.5:
+                    if current_label != last_added_label:
+                        transcript.append(current_label)
+                        last_added_label = current_label
+
+            frame_count += 1
+
+        cap.release()
+        os.remove(temp_path)
+
+        # 6. Return combined string
+        return "".join(transcript) if transcript else "No signs detected"
+
     except Exception as e:
         print(f"Inference error: {e}")
-        return "Error", 0.0
-
+        return "Error during processing"
+    
 @app.post("/predict-sign")
 async def predict_sign(request: VideoRequest):
-    label, confidence = predict_sign_from_data(request.file_data)
+    result_text = predict_sign_from_data(request.file_data)
     return {
         "success": True,
-        "prediction": label,
-        "confidence": f"{confidence * 100:.2f}%"
+        "prediction": result_text
     }
 
 # def generate_sign_images(text: str) -> list:

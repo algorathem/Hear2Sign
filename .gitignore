@@ -1,0 +1,17 @@
+# Web
+node_modules/
+.next/
+dist/
+build/
+
+# Python / Environment
+__pycache__/
+*.pyc
+h2senv/
+venv/
+.env
+
+# Large Files
+*.h5
+*.mp4
+temp_video.mp4
