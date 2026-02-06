@@ -48,6 +48,9 @@ python backend_api.py
 - **video_transcribe.py**: AWS Transcribe implementation (alternative)
 - **video_to_text.py**: Standalone AWS Transcribe script
 
+## .env file
+- **change the json to your absolute local path to hear2sign-486608-c5e4b6a776bd.json file
+
 ## API Endpoint
 
 - POST `http://localhost:8000/process-video`
