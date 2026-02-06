@@ -4,7 +4,8 @@ function VideoToSignLanguage() {
   const [posts, setPosts] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [contentType, setContentType] = useState('sign');
-
+  const API_BASE_URL = 'https://hear2sign.onrender.com';
+  
   const publishContent = async (file) => {
     if (!file.type.startsWith('video/')) {
       alert('Please select a valid video file');
@@ -25,8 +26,8 @@ function VideoToSignLanguage() {
       
       try {
         const endpoint = contentType === 'sign' 
-    ? 'http://localhost:8000/predict-sign' 
-    : 'http://localhost:8000/process-video';
+    ? 'API_BASE_URL/predict-sign' 
+    : 'API_BASE_URL/process-video';
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
